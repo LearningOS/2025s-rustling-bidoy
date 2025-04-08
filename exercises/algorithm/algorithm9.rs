@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,15 +36,53 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        // 插入新元素到数组末尾
+        self.items.push(value);
+        self.count += 1;
+
+        // 上浮操作，维护堆的性质
+        self.bubble_up(self.count);
+    }
+
+    fn bubble_up(&mut self, mut idx: usize) {
+        while idx > 1 {
+            let parent = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx], &self.items[parent]) {
+                self.items.swap(idx, parent);
+                idx = parent;
+            } else {
+                break;
+            }
+        }
+    }
+
+    fn bubble_down(&mut self, mut idx: usize) {
+        while self.children_present(idx) {
+            let child = self.smallest_child_idx(idx);
+            if (self.comparator)(&self.items[child], &self.items[idx]) {
+                self.items.swap(idx, child);
+                idx = child;
+            } else {
+                break;
+            }
+        }
+    }
+
+    fn smallest_child_idx(&self, idx: usize) -> usize {
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+
+        if right > self.count {
+            left
+        } else if (self.comparator)(&self.items[left], &self.items[right]) {
+            left
+        } else {
+            right
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
         idx / 2
-    }
-
-    fn children_present(&self, idx: usize) -> bool {
-        self.left_child_idx(idx) <= self.count
     }
 
     fn left_child_idx(&self, idx: usize) -> usize {
@@ -53,12 +90,11 @@ where
     }
 
     fn right_child_idx(&self, idx: usize) -> usize {
-        self.left_child_idx(idx) + 1
+        idx * 2 + 1
     }
 
-    fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+    fn children_present(&self, idx: usize) -> bool {
+        self.left_child_idx(idx) <= self.count
     }
 }
 
@@ -84,8 +120,21 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            None
+        } else {
+            // 交换堆顶元素和最后一个元素
+            self.items.swap(1, self.count);
+
+            // 移除并返回堆顶元素
+            let top = self.items.pop();
+            self.count -= 1;
+
+            // 下沉操作，维护堆的性质
+            self.bubble_down(1);
+
+            top
+        }
     }
 }
 
